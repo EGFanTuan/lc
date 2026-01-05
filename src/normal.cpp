@@ -123,4 +123,28 @@ auto s26::sumFourDivisors(vector<int>& nums) -> int{
   return ans;
 }
 
+auto s26::maxMatrixSum(vector<vector<int>>& matrix) -> long long{
+  long long ans=0, neg_sum=0;
+  int mini=INT_MAX, maxi=INT_MIN, count=0;
+  for(auto& row:matrix){
+    for(int num:row){
+      if(num>0){
+        mini = min(mini, num);
+        ans+=num;
+      }
+      else{
+        neg_sum+=num;
+        count++;
+        maxi=max(maxi, num);
+      }
+    }
+  }
+  if(count%2==0) return ans-neg_sum;
+  ans -= neg_sum;
+  ans += maxi;
+  int last=maxi;
+  if(abs(last) > mini) return ans-mini*2+abs(last);
+  else return ans+last;
+}
+
 

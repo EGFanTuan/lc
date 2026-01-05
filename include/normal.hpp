@@ -21,4 +21,6 @@ public:
   static int latestDayToCross(int row, int col, vector<vector<int>>& cells);
 
   int sumFourDivisors(vector<int>& nums);
+
+  long long maxMatrixSum(vector<vector<int>>& matrix);
 };
