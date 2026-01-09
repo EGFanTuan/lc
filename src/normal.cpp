@@ -148,3 +148,102 @@ auto s26::maxMatrixSum(vector<vector<int>>& matrix) -> long long{
 }
 
 
+auto s26::maxLevelSum(TreeNode* root) -> int{
+  int maxi = INT_MIN, level = 1, ans = 1;
+  queue<TreeNode*>q;
+  q.emplace(root);
+  while(!q.empty()){
+    int node_count=q.size(), sum=0;
+    while(node_count>0){
+      auto node = q.front();
+      q.pop();
+      sum+=node->val;
+      if(node->left!=nullptr) q.emplace(node->left);
+      if(node->right!=nullptr) q.emplace(node->right);
+      node_count--;
+    }
+    if(sum>maxi){
+      maxi=sum;
+      ans=level;
+    }
+    level++;
+  }
+  return ans;
+}
+
+auto s26::maxProduct(TreeNode* root) -> int{
+  long long mod=1e9+7, ans = INT_MIN;
+  int l=0, r=0, diff=INT_MAX;
+  long long sum=0;
+  queue<TreeNode*>q;
+  q.emplace(root);
+  while(!q.empty()){
+    auto node=q.front();
+    q.pop();
+    sum+=node->val;
+    if(node->left!=nullptr) q.emplace(node->left);
+    if(node->right!=nullptr) q.emplace(node->right);
+  }
+  auto func=[&](auto&& func, TreeNode* node) -> int {
+    if(node==nullptr) return 0;
+    int l_val=func(func, node->left);
+    int r_val=func(func, node->right);
+    ans = max(ans, (sum-l_val)*l_val);
+    ans = max(ans, (sum-r_val)*r_val);
+    return node->val+l_val+r_val;
+  };
+  func(func, root);
+  return ans%mod;
+}
+
+auto s26::maxDotProduct(vector<int>& nums1, vector<int>& nums2) -> int{
+  int m=nums1.size(), n=nums2.size();
+  int ans=INT_MIN;
+
+  vector<vector<int>>row_maxi(2, vector<int>(n+1, 0));
+
+  for(int i=1;i<=m;i++){
+    int maxi_row=0;
+    for(int j=1;j<=n;j++){
+      int cur=nums1[i-1]*nums2[j-1];
+      int tmp=cur+maxi_row;
+      ans=max(ans, tmp);
+      row_maxi[(1+i)%2][j] = max(tmp, row_maxi[i%2][j]);
+      maxi_row=max(maxi_row, row_maxi[i%2][j]);
+    }
+  }
+
+  return ans;
+}
+
+auto s26::subtreeWithAllDeepest(TreeNode* root) -> TreeNode*{
+  int max_depth=0;
+  vector<int>mp(501, -1);
+  auto find_maxi = [&](auto&& rec, TreeNode* node, int cur_depth=0) -> int {
+    if(node==nullptr) return cur_depth;
+    int l=rec(rec, node->left, cur_depth+1), r=rec(rec, node->right, cur_depth+1);
+    int m=max(l, r);
+    mp[node->val]=m;
+    // max_depth=max(max_depth, node->val);
+    return m;
+  };
+  max_depth=find_maxi(find_maxi, root);
+  queue<TreeNode*>q;
+  q.emplace(root);
+  while(!q.empty()){
+    int sz=q.size();
+    while(sz>0){
+      sz--;
+      auto node=q.front();
+      q.pop();
+      if(node==nullptr) continue;
+      if(mp[node->val]==max_depth){
+        if(node->left==nullptr && node->left==node->right) return node;
+        else if(node->left!=nullptr && node->right!=nullptr && mp[node->right->val] == mp[node->left->val]) return node;
+      }
+      q.emplace(node->left);
+      q.emplace(node->right);
+    }
+  }
+  return root;
+}
