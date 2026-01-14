@@ -147,7 +147,6 @@ auto s26::maxMatrixSum(vector<vector<int>>& matrix) -> long long{
   else return ans+last;
 }
 
-
 auto s26::maxLevelSum(TreeNode* root) -> int{
   int maxi = INT_MIN, level = 1, ans = 1;
   queue<TreeNode*>q;
@@ -247,3 +246,76 @@ auto s26::subtreeWithAllDeepest(TreeNode* root) -> TreeNode*{
   }
   return root;
 }
+
+auto s26::minTimeToVisitAllPoints(vector<vector<int>>& points) -> int {
+  int ans=0;
+  for(int i=1;i<points.size();i++){
+    auto& cur=points[i], &prev=points[i-1];
+    int ver=abs(cur[1]-prev[1]), hor=abs(cur[0]-prev[0]);
+    ans+=max(ver, hor);
+  }
+  return ans;
+}
+
+auto s26::separateSquares(vector<vector<int>>& squares) -> double {
+  double l=0, r=1e9+1;
+  auto check = [&](double mid) -> bool {
+    double lower=0, upper=0;
+    for(auto& sq:squares){
+      double u=max(0.0, sq[1]+sq[2]-mid), v=max(0.0, mid-sq[1]);
+      u=min(u, (double)sq[2]);
+      v=min(v, (double)sq[2]);
+      lower += v*sq[2];
+      upper += u*sq[2];
+    }
+    return upper <= lower;
+  };
+  while(r-l>1e-5){
+    double mid=l+(r-l)/2;
+    if(check(mid)) r=mid;
+    else l=mid+1e-5;
+  }
+  return l;
+}
+
+auto s26::minimumDeleteSum(string s1, string s2) -> int {
+  int m=s1.length(), n=s2.length();
+  vector<vector<int>>dp(m+1, vector<int>(n+1, 0));
+  for(int i=1;i<=m;i++){
+    dp[i][0]=dp[i-1][0]+(int)s1[i-1];
+  }
+  for(int j=1;j<=n;j++){
+    dp[0][j]=dp[0][j-1]+(int)s2[j-1];
+  }
+  for(int i=1;i<=m;i++){
+    for(int j=1;j<=n;j++){
+      dp[i][j]=min(
+        {dp[i-1][j-1]+(s1[i-1]==s2[j-1]?0:(int)s1[i-1]+(int)s2[j-1]),
+         dp[i-1][j]+(int)s1[i-1],
+         dp[i][j-1]+(int)s2[j-1]}
+      );
+    }
+  }
+  return dp[m][n];
+}
+
+auto s26::maximalRectangle(vector<vector<char>>& matrix) -> int {
+  int m=matrix.size(), n=matrix[0].size(), ans=0;
+  vector<vector<int>>toright(m+1, vector<int>(n+1, 0));
+  for(int i=m-1;i>=0;i--){
+    for(int j=n-1;j>=0;j--){
+      if(matrix[i][j]=='0') continue;
+      toright[i][j]=toright[i][j+1]+1;
+      ans=max(ans, toright[i][j]);
+      int k=i+1, min_width=toright[i][j];
+      while(k<m && toright[k][j]>0){
+        min_width=min(min_width, toright[k][j]);
+        ans=max(ans, min_width*(k-i+1));
+        k++;
+      }
+    }
+  }
+  return ans;
+}
+
+

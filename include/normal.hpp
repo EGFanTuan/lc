@@ -40,4 +40,13 @@ public:
   int maxDotProduct(vector<int>& nums1, vector<int>& nums2);
 
   TreeNode* subtreeWithAllDeepest(TreeNode* root);
+
+  int minTimeToVisitAllPoints(vector<vector<int>>& points);
+
+  double separateSquares(vector<vector<int>>& squares);
+
+  int minimumDeleteSum(string s1, string s2);
+
+  int maximalRectangle(vector<vector<char>>& matrix);
+  
 };
