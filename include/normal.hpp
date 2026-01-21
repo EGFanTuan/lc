@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <utility>
 #include <math.h>
+#include <numeric>
 
 using namespace std;
 
@@ -49,4 +50,15 @@ public:
 
   int maximalRectangle(vector<vector<char>>& matrix);
   
+  int maximizeSquareHoleArea(int n, int m, vector<int>& hBars, vector<int>& vBars);
+
+  int maximizeSquareArea(int m, int n, vector<int>& hFences, vector<int>& vFences);
+
+  long long largestSquareArea(vector<vector<int>>& bottomLeft, vector<vector<int>>& topRight);
+
+  int largestMagicSquare(vector<vector<int>>& grid);
+
+  int maxSideLength(vector<vector<int>>& mat, int threshold);
+
+  vector<int> minBitwiseArray(vector<int>& nums);
 };

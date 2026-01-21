@@ -2,6 +2,8 @@
 
 #define s26 a26s1
 
+vector<int> s26::sumFourDivisorsVec = {};
+
 auto s26::countNegatives(vector<vector<int>>& grid) -> int {
   int m=grid.size(), n=grid[0].size();
   int ans = 0;
@@ -318,4 +320,181 @@ auto s26::maximalRectangle(vector<vector<char>>& matrix) -> int {
   return ans;
 }
 
+auto s26::maximizeSquareHoleArea(int n, int m, vector<int>& hBars, vector<int>& vBars) -> int {
+  hBars.emplace_back(-1);
+  vBars.emplace_back(-1);
+  sort(hBars.begin(), hBars.end());
+  sort(vBars.begin(), vBars.end());
+  int max_h=1, max_v=1, count=0;
+  for(int i=1;i<hBars.size();i++){
+    if(hBars[i]-1==hBars[i-1]){
+      count++;
+    }
+    else{
+      count=1;
+    }
+    max_h=max(max_h, count+1);
+  }
+  for(int i=1;i<vBars.size();i++){
+    if(vBars[i]-1==vBars[i-1]){
+      count++;
+    }
+    else{
+      count=1;
+    }
+    max_v=max(max_v, count+1);
+  }
+  return min(max_h, max_v)*min(max_h, max_v);
+}
+
+auto s26::maximizeSquareArea(int m, int n, vector<int>& hFences, vector<int>& vFences) -> int {
+  int mod = 1e9+7;
+  hFences.emplace_back(1);
+  hFences.emplace_back(m);
+  vFences.emplace_back(1);
+  vFences.emplace_back(n);
+  sort(hFences.begin(), hFences.end());
+  sort(vFences.begin(), vFences.end());
+//   for(int i=1;i<hFences.size();i++){
+//     hFences[i]=hFences[i]-hFences[i-1];
+//   }
+//   for(int i=1;i<vFences.size();i++){
+//     vFences[i]=vFences[i]-vFences[i-1];
+//   }
+  for(int i=hFences.size()-1;i>0;i--){
+    hFences[i]=hFences[i]-hFences[i-1];
+  }
+  for(int i=vFences.size()-1;i>0;i--){
+    vFences[i]=vFences[i]-vFences[i-1];
+  }
+  hFences[0]=0;
+  vFences[0]=0;
+  for(int i=1;i<hFences.size();i++){
+    hFences[i]=hFences[i-1]+hFences[i];
+  }
+  for(int i=1;i<vFences.size();i++){
+    vFences[i]=vFences[i-1]+vFences[i];
+  }
+  long long max_area=-1;
+  unordered_set<int> h_set;
+  for(int i=1;i<hFences.size();i++){
+    for(int j=i;j<hFences.size();j++){
+      h_set.insert(hFences[j]-hFences[i-1]);
+    }
+  }
+  for(int i=1;i<vFences.size();i++){
+    for(int j=i;j<vFences.size();j++){
+      int width=vFences[j]-vFences[i-1];
+      if(h_set.find(width)!=h_set.end()){
+        max_area=max(max_area, (long long)width*width);
+      }
+    }
+  }
+  return max_area % mod;
+}
+
+auto s26::largestSquareArea(vector<vector<int>>& bottomLeft, vector<vector<int>>& topRight) -> long long {
+  int n=bottomLeft.size();
+  vector<int>index(n, 0);
+  iota(index.begin(), index.end(), 0);
+  sort(index.begin(), index.end(), [&bottomLeft](int l, int r){
+    return bottomLeft[l][0]<bottomLeft[r][0];
+  });
+  long long ans=0;
+  for(int i=0;i<n;i++){
+    int l=index[i];
+    for(int j=i+1;j<n;j++){
+      int r=index[j];
+      if(bottomLeft[r][0]>=topRight[l][0]) break;
+      if(bottomLeft[r][1]>=topRight[l][1]) continue;
+      if(topRight[r][0]<=bottomLeft[l][0]) continue;
+      long long rside=min(topRight[r][0], topRight[l][0]);
+      long long uside=min(topRight[r][1], topRight[l][1]);
+      long long lside=max(bottomLeft[r][0], bottomLeft[l][0]);
+      long long dside=max(bottomLeft[r][1], bottomLeft[l][1]);
+      long long side=min(rside-lside, uside-dside);
+      if(side>0)
+      ans = max(ans, side*side);
+    }
+  }
+  return ans;
+}
+
+auto s26::largestMagicSquare(vector<vector<int>>& grid) -> int {
+  int m=grid.size(), n=grid[0].size(), ans=1;
+  vector<vector<int>>ltr(m+1, vector<int>(n+1,0));
+  auto utb=ltr;
+  auto lutrb=ltr;
+  for(int i=1;i<=m;i++){
+    for(int j=1;j<=n;j++){
+      ltr[i][j]=ltr[i][j-1]+grid[i-1][j-1];
+      utb[i][j]=utb[i-1][j]+grid[i-1][j-1];
+      lutrb[i][j]=lutrb[i-1][j-1]+grid[i-1][j-1];
+    }
+  }
+  for(int i=m;i>0;i--){
+    for(int j=1;j<=n;j++){
+      int prefix=0;
+      for(int k=0;i-k>0&&j+k<=n;k++){
+        int row=i-k, col=j+k;
+        prefix+=grid[row-1][col-1];
+        bool flag=true;
+        for(int l=row;l<=i;l++){
+          if(ltr[l][col]-ltr[l][j-1]!=prefix){
+            flag=false;
+            break;
+          }
+        }
+        if(!flag) continue;
+        for(int l=col;l>=j;l--){
+          if(utb[i][l]-utb[row-1][l]!=prefix){
+            flag=false;
+            break;
+          }
+        }
+        if(!flag) continue;
+        if(lutrb[i][col]-lutrb[row-1][j-1]!=prefix)continue;
+        ans=max(ans, k+1);
+      }
+    }
+  }
+  return ans;
+}
+
+auto s26::maxSideLength(vector<vector<int>>& mat, int threshold) -> int {
+  int m=mat.size(), n=mat[0].size();
+  int ans=0;
+  vector<vector<int>>prefix(m+1, vector<int>(n+1, 0));
+  for(int i=1;i<=m;i++){
+    for(int j=1;j<=n;j++){
+      prefix[i][j]=prefix[i-1][j]+prefix[i][j-1]-prefix[i-1][j-1]+mat[i-1][j-1];
+    }
+  }
+  for(int i=1;i<=m;i++){
+    for(int j=1;j<=n;j++){
+      for(int side=0;side+i<=m&&side+j<=n;side++){
+        int ii=side+i, jj=side+j;
+        if(prefix[ii][jj]-prefix[ii][j-1]-prefix[i-1][jj]+prefix[i-1][j-1]<=threshold)
+          ans=max(ans, side+1);
+      }
+    }
+  }
+  return ans;
+}
+
+auto s26::minBitwiseArray(vector<int>& nums) -> vector<int> {
+  for(auto& num:nums){
+    if(num==2){
+      num=-1;
+      continue;
+    }
+    for(int j=0;j<31;j++){
+      if(!(num&(1<<j))){
+        num&=~(1<<(j-1));
+        break;
+      }
+    }
+  }
+  return nums;
+}
 
