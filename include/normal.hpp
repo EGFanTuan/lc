@@ -61,4 +61,6 @@ public:
   int maxSideLength(vector<vector<int>>& mat, int threshold);
 
   vector<int> minBitwiseArray(vector<int>& nums);
+
+  vector<int> getBiggestThree(vector<vector<int>>& grid);
 };

@@ -498,3 +498,46 @@ auto s26::minBitwiseArray(vector<int>& nums) -> vector<int> {
   return nums;
 }
 
+auto s26::getBiggestThree(vector<vector<int>>& grid) -> vector<int> {
+  int m=grid.size(), n=grid[0].size();
+  auto origin = grid;
+  auto gridr = grid;
+  for(int col=1; col<n; col++){
+    for(int row=0; row<m-1; row++){
+      grid[row][col] += grid[row+1][col-1];
+      gridr[row][n-col-1] += gridr[row+1][n-col];
+    }
+  }
+  auto getPrefix = [&grid, &gridr, m, n](int row, int col, int len) -> int {
+    if(len == 1) return 0;
+    col += (len - 1) * 2;
+    int ans = grid[row][col];
+    if(row + len < m && col - len >= 0) 
+      ans -= grid[row + len][col - len];
+    ans += gridr[row - len + 1][col - len + 1] - gridr[row][col];
+    return ans;
+  };
+  vector<int>sums;
+  sums.reserve(m*n*max(n, m));
+  for(int row=0; row<m; row++){
+    for(int col=0; col<n; col++){
+      int sum = origin[row][col];
+      sums.emplace_back(sum);
+      for(int len=2; row+len-1<m && col+(len-1)*2<n && row-len+1>=0; len++){
+        if(len > 2)
+          sum += origin[row+len-2][col+len-2] + origin[row-len+2][col+len-2];
+          sums.emplace_back(sum + getPrefix(row, col, len));
+      }
+    }
+  }
+  sort(sums.begin(), sums.end(), greater<int>());
+  vector<int>ans;
+  ans.emplace_back(sums[0]);
+  for(int i=1;i<sums.size() && ans.size()<3; i++){
+    if(sums[i]!=ans.back())
+      ans.emplace_back(sums[i]);
+  }
+  return ans;
+}
+
+
